@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import orbitiaLogo from "@/assets/orbitia-logo.asset.json";
+import { trackTelegramClick } from "@/lib/analytics";
 
 const TELEGRAM_URL = "https://t.me/orbitia_bot";
 
@@ -35,6 +36,7 @@ function Nav() {
       </div>
       <a
         href={TELEGRAM_URL}
+        onClick={() => trackTelegramClick("nav")}
         className="hidden rounded-full border border-[var(--gold)]/40 px-5 py-2 text-xs uppercase tracking-[0.25em] text-[var(--gold-soft)] transition hover:bg-[var(--gold)]/10 sm:inline-block"
       >
         Открыть в Telegram
@@ -75,6 +77,7 @@ function Hero() {
       <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row">
         <a
           href={TELEGRAM_URL}
+          onClick={() => trackTelegramClick("hero")}
           className="group relative inline-flex items-center gap-3 rounded-full bg-[var(--gradient-gold)] px-8 py-4 text-sm font-medium uppercase tracking-[0.2em] text-[var(--ink)] shadow-[var(--shadow-glow)] transition hover:scale-[1.02]"
           style={{ background: "var(--gradient-gold)" }}
         >
@@ -298,6 +301,7 @@ function CTA() {
       </p>
       <a
         href={TELEGRAM_URL}
+        onClick={() => trackTelegramClick("cta")}
         className="mt-10 inline-flex items-center gap-3 rounded-full px-10 py-4 text-sm font-medium uppercase tracking-[0.2em] text-[var(--ink)] shadow-[var(--shadow-glow)] transition hover:scale-[1.02]"
         style={{ background: "var(--gradient-gold)" }}
       >

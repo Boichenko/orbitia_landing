@@ -10,6 +10,7 @@ import {
 import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
+import { GA_MEASUREMENT_ID } from "../lib/analytics";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
 const SITE_URL = "https://orbitia.info";
@@ -160,6 +161,22 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
     ],
     headScripts: [
+      {
+        tag: "script",
+        attrs: {
+          async: true,
+          src: `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`,
+        },
+      },
+      {
+        tag: "script",
+        children: `
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', '${GA_MEASUREMENT_ID}');
+        `,
+      },
       {
         tag: "script",
         attrs: { type: "application/ld+json" },
