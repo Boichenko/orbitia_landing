@@ -1,0 +1,172 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-display: "Cormorant Garamond", serif;
+  --font-sans: "Jost", system-ui, sans-serif;
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-gold: var(--gold);
+  --color-gold-soft: var(--gold-soft);
+  --color-ink: var(--ink);
+
+  --shadow-glow: 0 0 80px -20px color-mix(in oklab, var(--gold) 45%, transparent);
+  --shadow-elegant: 0 30px 60px -30px color-mix(in oklab, #000 90%, transparent);
+
+  --gradient-night: radial-gradient(
+    ellipse at top,
+    oklch(0.22 0.04 265) 0%,
+    oklch(0.13 0.03 265) 45%,
+    oklch(0.09 0.02 265) 100%
+  );
+  --gradient-gold: linear-gradient(
+    135deg,
+    oklch(0.86 0.13 85) 0%,
+    oklch(0.72 0.13 75) 50%,
+    oklch(0.58 0.11 60) 100%
+  );
+}
+
+:root {
+  --radius: 0.5rem;
+
+  --ink: oklch(0.09 0.02 265);
+  --background: oklch(0.11 0.025 265);
+  --foreground: oklch(0.96 0.01 90);
+
+  --card: oklch(0.15 0.03 265);
+  --card-foreground: oklch(0.96 0.01 90);
+  --popover: oklch(0.15 0.03 265);
+  --popover-foreground: oklch(0.96 0.01 90);
+
+  --gold: oklch(0.79 0.13 82);
+  --gold-soft: oklch(0.88 0.08 88);
+
+  --primary: oklch(0.79 0.13 82);
+  --primary-foreground: oklch(0.13 0.02 265);
+
+  --secondary: oklch(0.2 0.03 265);
+  --secondary-foreground: oklch(0.96 0.01 90);
+
+  --muted: oklch(0.18 0.025 265);
+  --muted-foreground: oklch(0.7 0.02 80);
+
+  --accent: oklch(0.79 0.13 82);
+  --accent-foreground: oklch(0.13 0.02 265);
+
+  --destructive: oklch(0.6 0.22 25);
+  --destructive-foreground: oklch(0.98 0 0);
+
+  --border: oklch(0.79 0.13 82 / 18%);
+  --input: oklch(0.79 0.13 82 / 25%);
+  --ring: oklch(0.79 0.13 82 / 60%);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background: var(--gradient-night);
+    background-attachment: fixed;
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    font-feature-settings: "ss01", "cv11";
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    letter-spacing: 0.01em;
+  }
+}
+
+@utility text-gold-gradient {
+  background: var(--gradient-gold);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@utility hairline {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold) 50%, transparent);
+}
+
+@keyframes spin-slow {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes spin-reverse {
+  to {
+    transform: rotate(-360deg);
+  }
+}
+@keyframes twinkle {
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+@keyframes float-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@utility animate-spin-slow {
+  animation: spin-slow 60s linear infinite;
+}
+@utility animate-spin-reverse {
+  animation: spin-reverse 90s linear infinite;
+}
+@utility animate-twinkle {
+  animation: twinkle 3s ease-in-out infinite;
+}
+@utility animate-float-in {
+  animation: float-in 0.9s ease-out both;
+}
