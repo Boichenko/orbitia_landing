@@ -12,6 +12,47 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
+const SITE_URL = "https://orbitia.info";
+const SITE_TITLE = "Orbitia — соляр на год в Telegram";
+const SITE_DESCRIPTION =
+  "Telegram-бот Orbitia рассчитывает персональный соляр на год: карта возвращения Солнца, асцендент, дома, аспекты и разбор главных тем в PDF.";
+const SITE_IMAGE = `${SITE_URL}/assets/orbitia-logo.jpeg`;
+const TELEGRAM_URL = "https://t.me/orbitia_bot";
+
+const structuredData = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": `${SITE_URL}/#website`,
+      name: "Orbitia",
+      url: SITE_URL,
+      inLanguage: "ru",
+      description: SITE_DESCRIPTION,
+      potentialAction: {
+        "@type": "ViewAction",
+        target: TELEGRAM_URL,
+        name: "Рассчитать соляр в Telegram",
+      },
+    },
+    {
+      "@type": "SoftwareApplication",
+      "@id": `${SITE_URL}/#telegram-bot`,
+      name: "Orbitia",
+      applicationCategory: "LifestyleApplication",
+      operatingSystem: "Telegram",
+      url: TELEGRAM_URL,
+      image: SITE_IMAGE,
+      description: SITE_DESCRIPTION,
+      offers: {
+        "@type": "Offer",
+        price: "0",
+        priceCurrency: "USD",
+      },
+    },
+  ],
+};
+
 function NotFoundComponent() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
@@ -77,28 +118,52 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Orbitia — соляр на год в Telegram" },
+      { title: SITE_TITLE },
       {
         name: "description",
-        content:
-          "Orbitia рассчитывает ваш соляр на год: карта, ключевые аспекты и разбор по домам в PDF. Прямо в Telegram, за пару минут.",
+        content: SITE_DESCRIPTION,
       },
-      { property: "og:title", content: "Orbitia — соляр на год в Telegram" },
+      {
+        name: "keywords",
+        content:
+          "соляр, соляр на год, астрология, соляр онлайн, рассчитать соляр, соляр PDF, Telegram бот астрология, Orbitia",
+      },
+      { name: "robots", content: "index, follow" },
+      { name: "theme-color", content: "#171929" },
+      { name: "application-name", content: "Orbitia" },
+      { property: "og:locale", content: "ru_RU" },
+      { property: "og:site_name", content: "Orbitia" },
+      { property: "og:title", content: SITE_TITLE },
       {
         property: "og:description",
-        content: "Персональный соляр на год: карта, аспекты и разбор по домам в PDF. В Telegram.",
+        content: SITE_DESCRIPTION,
       },
+      { property: "og:url", content: SITE_URL },
       { property: "og:type", content: "website" },
+      { property: "og:image", content: SITE_IMAGE },
+      { property: "og:image:alt", content: "Orbitia — соляр на год в PDF" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: SITE_TITLE },
+      { name: "twitter:description", content: SITE_DESCRIPTION },
+      { name: "twitter:image", content: SITE_IMAGE },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "canonical", href: SITE_URL },
+      { rel: "icon", href: "/assets/orbitia-logo.jpeg", type: "image/jpeg" },
+      { rel: "apple-touch-icon", href: "/assets/orbitia-logo.jpeg" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Jost:wght@300;400;500;600&display=swap",
+      },
+    ],
+    headScripts: [
+      {
+        tag: "script",
+        attrs: { type: "application/ld+json" },
+        children: JSON.stringify(structuredData),
       },
     ],
   }),
@@ -111,7 +176,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="ru">
       <head>
         <HeadContent />
       </head>
