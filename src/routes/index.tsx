@@ -21,6 +21,8 @@ function Index() {
       <Divider />
       <HowItWorks />
       <Divider />
+      <SolarGuide />
+      <Divider />
       <FAQ />
       <CTA />
       <Footer />
@@ -236,6 +238,61 @@ function HowItWorks() {
             <h3 className="mt-4 font-display text-2xl">{s.t}</h3>
             <p className="mt-2 text-muted-foreground">{s.d}</p>
           </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function SolarGuide() {
+  const topics = [
+    {
+      title: "Что такое соляр",
+      body: "Соляр — это астрологическая карта на момент, когда Солнце возвращается в точное положение, которое занимало в день рождения. Ее используют как прогноз на личный год: от одного дня рождения до следующего.",
+    },
+    {
+      title: "Как рассчитывается соляр",
+      body: "Для расчета соляра берутся дата, точное время и место рождения, а также город, где человек встречает новый год жизни. По этим данным строится карта возвращения Солнца и анализируются дома, планеты и аспекты.",
+    },
+    {
+      title: "Какие данные нужны",
+      body: "Чтобы рассчитать соляр онлайн точнее, важно знать время рождения хотя бы до минут. Если время неизвестно, можно увидеть общие темы года, но асцендент, дома и часть прогноза будут менее надежными.",
+    },
+    {
+      title: "Соляр и натальная карта",
+      body: "Натальная карта описывает базовый потенциал человека, а соляр показывает акценты конкретного года. Поэтому в разборе важно смотреть не только карту соляра отдельно, но и ее связь с натальной картой.",
+    },
+    {
+      title: "Почему важно место",
+      body: "Место, где вы встречаете день рождения, влияет на сетку домов соляра. Из-за смены города или страны акценты года могут сместиться: например, с карьеры на отношения, обучение, здоровье или переезд.",
+    },
+  ];
+
+  return (
+    <section className="mx-auto max-w-6xl px-6 py-24">
+      <div className="mb-14 max-w-3xl">
+        <p className="mb-3 text-xs uppercase tracking-[0.4em] text-[var(--gold-soft)]/80">
+          Соляр онлайн
+        </p>
+        <h2 className="font-display text-4xl sm:text-5xl">
+          Что важно знать <span className="italic text-gold-gradient">перед расчетом</span>
+        </h2>
+        <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
+          Orbitia помогает рассчитать соляр на год в Telegram и получить PDF-разбор без сложных
+          таблиц. Ниже — короткое объяснение, как работает соляр, какие данные нужны и почему место
+          дня рождения влияет на прогноз.
+        </p>
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-5">
+        {topics.map((topic) => (
+          <article
+            key={topic.title}
+            className="rounded-lg border border-[var(--gold)]/15 bg-[var(--card)]/35 p-6 lg:col-span-1"
+          >
+            <h3 className="font-display text-2xl">{topic.title}</h3>
+            <p className="mt-4 text-sm leading-relaxed text-muted-foreground">{topic.body}</p>
+          </article>
         ))}
       </div>
     </section>
