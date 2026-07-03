@@ -14,9 +14,9 @@ import { GA_MEASUREMENT_ID } from "../lib/analytics";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
 const SITE_URL = "https://orbitia.info";
-const SITE_TITLE = "Orbitia — соляр на год в Telegram";
+const SITE_TITLE = "Orbitia — соляр на год и совместимость в Telegram";
 const SITE_DESCRIPTION =
-  "Telegram-бот Orbitia рассчитывает персональный соляр на год: карта возвращения Солнца, асцендент, дома, аспекты и разбор главных тем в PDF.";
+  "Telegram-бот Orbitia рассчитывает персональный соляр на год и совместимость пары: карта возвращения Солнца, синастрия, аспекты и разбор главных тем в PDF.";
 const SITE_IMAGE = `${SITE_URL}/assets/orbitia-logo.jpeg`;
 const TELEGRAM_URL = "https://t.me/orbitia_bot";
 
@@ -33,7 +33,7 @@ const structuredData = {
       potentialAction: {
         "@type": "ViewAction",
         target: TELEGRAM_URL,
-        name: "Рассчитать соляр в Telegram",
+        name: "Рассчитать соляр или совместимость в Telegram",
       },
     },
     {
@@ -45,6 +45,7 @@ const structuredData = {
       url: TELEGRAM_URL,
       image: SITE_IMAGE,
       description: SITE_DESCRIPTION,
+      featureList: ["Соляр на год", "Совместимость с партнёром", "PDF-разбор", "Расчёт в Telegram"],
       offers: {
         "@type": "Offer",
         price: "0",
@@ -127,7 +128,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       {
         name: "keywords",
         content:
-          "соляр, соляр на год, астрология, соляр онлайн, рассчитать соляр, соляр PDF, Telegram бот астрология, Orbitia",
+          "соляр, соляр на год, совместимость, синастрия, совместимость пары, астрология, соляр онлайн, рассчитать соляр, соляр PDF, Telegram бот астрология, Orbitia",
       },
       { name: "robots", content: "index, follow" },
       { name: "theme-color", content: "#171929" },
@@ -142,7 +143,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:url", content: SITE_URL },
       { property: "og:type", content: "website" },
       { property: "og:image", content: SITE_IMAGE },
-      { property: "og:image:alt", content: "Orbitia — соляр на год в PDF" },
+      { property: "og:image:alt", content: "Orbitia — соляр на год и совместимость в PDF" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: SITE_TITLE },
       { name: "twitter:description", content: SITE_DESCRIPTION },
