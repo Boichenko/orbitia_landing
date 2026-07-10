@@ -7,14 +7,14 @@ declare global {
   }
 }
 
-export function trackTelegramClick(location: string) {
+export function trackReportIntent(location: string, reportType?: string) {
   if (typeof window === "undefined" || typeof window.gtag !== "function") {
     return;
   }
 
-  window.gtag("event", "click_telegram", {
+  window.gtag("event", "start_report_flow", {
     event_category: "engagement",
     event_label: location,
-    link_url: "https://t.me/orbitia_bot",
+    report_type: reportType,
   });
 }

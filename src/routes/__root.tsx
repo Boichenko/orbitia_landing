@@ -14,11 +14,11 @@ import { GA_MEASUREMENT_ID } from "../lib/analytics";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
 const SITE_URL = "https://orbitia.info";
-const SITE_TITLE = "Orbitia — соляр на год и совместимость в Telegram";
+const SITE_TITLE = "Orbitia — прогноз на год и совместимость партнёров";
 const SITE_DESCRIPTION =
-  "Telegram-бот Orbitia рассчитывает персональный соляр на год и совместимость пары: карта возвращения Солнца, синастрия, аспекты и разбор главных тем в PDF.";
+  "Orbitia рассчитывает персональный прогноз на год и совместимость партнёров: карта возвращения Солнца, синастрия, аспекты и разбор главных тем в PDF.";
 const SITE_IMAGE = `${SITE_URL}/assets/orbitia-logo.jpeg`;
-const TELEGRAM_URL = "https://t.me/orbitia_bot";
+const CALCULATE_URL = `${SITE_URL}/calculate`;
 
 const structuredData = {
   "@context": "https://schema.org",
@@ -32,20 +32,20 @@ const structuredData = {
       description: SITE_DESCRIPTION,
       potentialAction: {
         "@type": "ViewAction",
-        target: TELEGRAM_URL,
-        name: "Рассчитать соляр или совместимость в Telegram",
+        target: CALCULATE_URL,
+        name: "Сделать расчёт прогноза или совместимости",
       },
     },
     {
       "@type": "SoftwareApplication",
-      "@id": `${SITE_URL}/#telegram-bot`,
+      "@id": `${SITE_URL}/#app`,
       name: "Orbitia",
       applicationCategory: "LifestyleApplication",
-      operatingSystem: "Telegram",
-      url: TELEGRAM_URL,
+      operatingSystem: "Web",
+      url: CALCULATE_URL,
       image: SITE_IMAGE,
       description: SITE_DESCRIPTION,
-      featureList: ["Соляр на год", "Совместимость с партнёром", "PDF-разбор", "Расчёт в Telegram"],
+      featureList: ["Прогноз на год", "Совместимость партнёров", "PDF-разбор", "Расчёт на сайте"],
       offers: {
         "@type": "Offer",
         price: "0",
@@ -128,7 +128,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       {
         name: "keywords",
         content:
-          "соляр, соляр на год, совместимость, синастрия, совместимость пары, астрология, соляр онлайн, рассчитать соляр, соляр PDF, Telegram бот астрология, Orbitia",
+          "соляр, соляр на год, прогноз на год, совместимость, синастрия, совместимость пары, астрология, соляр онлайн, рассчитать соляр, соляр PDF, Orbitia",
       },
       { name: "robots", content: "index, follow" },
       { name: "theme-color", content: "#171929" },

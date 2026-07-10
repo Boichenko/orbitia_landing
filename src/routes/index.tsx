@@ -1,8 +1,6 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import orbitiaLogo from "@/assets/orbitia-logo.asset.json";
-import { trackTelegramClick } from "@/lib/analytics";
-
-const TELEGRAM_URL = "https://t.me/orbitia_bot";
+import { trackReportIntent } from "@/lib/analytics";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -36,13 +34,13 @@ function Nav() {
       <div className="flex items-center gap-3">
         <div className="font-display text-2xl tracking-[0.3em] text-gold-gradient">ORBITIA</div>
       </div>
-      <a
-        href={TELEGRAM_URL}
-        onClick={() => trackTelegramClick("nav")}
+      <Link
+        to="/calculate"
+        onClick={() => trackReportIntent("nav")}
         className="hidden rounded-full border border-[var(--gold)]/40 px-5 py-2 text-xs uppercase tracking-[0.25em] text-[var(--gold-soft)] transition hover:bg-[var(--gold)]/10 sm:inline-block"
       >
-        Открыть в Telegram
-      </a>
+        Сделать расчёт
+      </Link>
     </header>
   );
 }
@@ -65,35 +63,35 @@ function Hero() {
       </div>
 
       <p className="mb-4 text-xs uppercase tracking-[0.4em] text-[var(--gold-soft)]/80">
-        Соляр · Совместимость · PDF
+        Прогноз · Совместимость · PDF
       </p>
       <h1 className="max-w-4xl font-display text-5xl leading-[1.1] sm:text-7xl">
-        <span className="text-gold-gradient italic">Соляр на год</span>
+        <span className="text-gold-gradient italic">Прогноз на год</span>
         <br />
-        <span className="text-gold-gradient italic">Совместимость с партнёром</span>
+        <span className="text-gold-gradient italic">Совместимость партнёров</span>
       </h1>
       <p className="mt-6 max-w-xl text-lg text-muted-foreground">
-        Telegram-бот Orbitia строит две астрологические карты — вашу карту года и синастрию пары.
-        Разбор приходит готовым PDF за пару минут.
+        Orbitia строит две астрологические карты — вашу карту года и синастрию пары. Разбор приходит
+        готовым PDF за пару минут.
       </p>
 
       <div className="mt-10 grid w-full max-w-2xl gap-4 sm:grid-cols-2">
-        <a
-          href={TELEGRAM_URL}
-          onClick={() => trackTelegramClick("hero_solar")}
+        <Link
+          to="/calculate"
+          onClick={() => trackReportIntent("hero", "solar")}
           className="group relative flex items-center justify-center gap-3 rounded-full px-6 py-4 text-sm font-medium uppercase tracking-[0.2em] text-[var(--ink)] shadow-[var(--shadow-glow)] transition hover:scale-[1.02]"
           style={{ background: "var(--gradient-gold)" }}
         >
-          <TelegramIcon /> Соляр на год
-        </a>
-        <a
-          href={TELEGRAM_URL}
-          onClick={() => trackTelegramClick("hero_compatibility")}
+          Прогноз на год
+        </Link>
+        <Link
+          to="/calculate"
+          onClick={() => trackReportIntent("hero", "synastry")}
           className="group relative flex items-center justify-center gap-3 rounded-full px-6 py-4 text-sm font-medium uppercase tracking-[0.2em] text-[var(--ink)] shadow-[var(--shadow-glow)] transition hover:scale-[1.02]"
           style={{ background: "var(--gradient-gold)" }}
         >
-          <TelegramIcon /> Совместимость пары
-        </a>
+          Совместимость партнёров
+        </Link>
       </div>
 
       <div className="mt-6 flex items-center gap-6 text-[11px] uppercase tracking-[0.3em] text-muted-foreground/80">
@@ -107,11 +105,11 @@ function Hero() {
       </div>
 
       <div className="mt-14 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-[11px] uppercase tracking-[0.35em] text-muted-foreground">
-        <span>Solar returns</span>
+        <span>Прогноз на год</span>
         <span className="text-[var(--gold)]">✦</span>
-        <span>Synastry</span>
+        <span>Совместимость</span>
         <span className="text-[var(--gold)]">✦</span>
-        <span>You, in focus</span>
+        <span>PDF-разбор</span>
       </div>
     </section>
   );
@@ -148,10 +146,10 @@ function Inside() {
     <section className="mx-auto max-w-6xl px-6 py-24">
       <div className="mb-16 text-center">
         <p className="mb-3 text-xs uppercase tracking-[0.4em] text-[var(--gold-soft)]/80">
-          Соляр · Solar return
+          Прогноз на год
         </p>
         <h2 className="font-display text-4xl sm:text-5xl">
-          <span className="text-gold-gradient italic">Соляр на год</span>
+          <span className="text-gold-gradient italic">Что входит в прогноз</span>
         </h2>
       </div>
       <div className="grid gap-px overflow-hidden rounded-lg border border-[var(--gold)]/15 bg-[var(--gold)]/10 sm:grid-cols-2">
@@ -252,10 +250,10 @@ function Compatibility() {
       <div className="absolute inset-x-0 top-1/3 -z-10 h-72 bg-[var(--gold)]/8 blur-[120px]" />
       <div className="mb-14 text-center">
         <p className="mb-3 text-xs uppercase tracking-[0.4em] text-[var(--gold-soft)]/80">
-          Совместимость · Synastry
+          Совместимость партнёров
         </p>
         <h2 className="font-display text-4xl sm:text-5xl">
-          <span className="text-gold-gradient italic">Совместимость с партнёром</span>
+          <span className="text-gold-gradient italic">Разбор пары</span>
         </h2>
         <p className="mx-auto mt-5 max-w-2xl text-muted-foreground">
           Orbitia сравнивает две натальные карты и собирает PDF по паре: где притяжение, где
@@ -277,16 +275,16 @@ function Compatibility() {
 
       <div className="mt-12 flex flex-col items-center gap-4 text-center">
         <p className="max-w-xl text-sm text-muted-foreground">
-          Нужны дата, время и место рождения обоих. Разбор приходит в чат Telegram отдельным PDF.
+          Нужны дата, время и место рождения обоих. Разбор формируется отдельным PDF.
         </p>
-        <a
-          href={TELEGRAM_URL}
-          onClick={() => trackTelegramClick("compatibility")}
+        <Link
+          to="/calculate"
+          onClick={() => trackReportIntent("compatibility", "synastry")}
           className="inline-flex items-center gap-3 rounded-full px-8 py-4 text-sm font-medium uppercase tracking-[0.2em] text-[var(--ink)] shadow-[var(--shadow-glow)] transition hover:scale-[1.02]"
           style={{ background: "var(--gradient-gold)" }}
         >
-          <TelegramIcon /> Проверить пару
-        </a>
+          Сделать расчёт
+        </Link>
       </div>
     </section>
   );
@@ -296,11 +294,15 @@ function HowItWorks() {
   const steps = [
     {
       n: "01",
-      t: "Откройте бота",
-      d: "Нажмите «Рассчитать соляр» и запустите Orbitia в Telegram.",
+      t: "Выберите расчёт",
+      d: "Нажмите «Сделать расчёт» и выберите прогноз на год или совместимость партнёров.",
     },
     { n: "02", t: "Укажите данные", d: "Дата, время и место рождения. Место, где встретите год." },
-    { n: "03", t: "Получите PDF", d: "Через пару минут — готовый разбор соляра на год в чате." },
+    {
+      n: "03",
+      t: "Получите PDF",
+      d: "Через пару минут — готовый разбор скачивается на устройство.",
+    },
   ];
   return (
     <section className="mx-auto max-w-6xl px-6 py-24">
@@ -354,7 +356,7 @@ function FAQ() {
     },
     {
       q: "В каком формате приходит результат?",
-      a: "PDF-файл прямо в чат Telegram: разбор по домам, аспекты и главные темы — для соляра или для пары.",
+      a: "PDF-файл: разбор по домам, аспекты и главные темы — для прогноза на год или для пары.",
     },
   ];
   return (
@@ -393,17 +395,16 @@ function CTA() {
         Загляните в <span className="italic text-gold-gradient">карту</span>
       </h2>
       <p className="mx-auto mt-6 max-w-lg text-muted-foreground">
-        Откройте Orbitia в Telegram, введите данные и получите разбор — соляр или совместимость — в
-        PDF.
+        Введите данные на сайте и получите разбор — прогноз на год или совместимость — в PDF.
       </p>
-      <a
-        href={TELEGRAM_URL}
-        onClick={() => trackTelegramClick("cta")}
+      <Link
+        to="/calculate"
+        onClick={() => trackReportIntent("cta")}
         className="mt-10 inline-flex items-center gap-3 rounded-full px-10 py-4 text-sm font-medium uppercase tracking-[0.2em] text-[var(--ink)] shadow-[var(--shadow-glow)] transition hover:scale-[1.02]"
         style={{ background: "var(--gradient-gold)" }}
       >
-        <TelegramIcon /> Открыть Orbitia
-      </a>
+        Сделать расчёт
+      </Link>
     </section>
   );
 }
@@ -413,18 +414,10 @@ function Footer() {
     <footer className="border-t border-[var(--gold)]/15">
       <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-6 py-10 text-xs uppercase tracking-[0.3em] text-muted-foreground sm:flex-row">
         <div className="text-gold-gradient">ORBITIA</div>
-        <div>Solar maps · Annual cycles · You, in focus</div>
+        <div>Прогноз · Совместимость · PDF</div>
         <div>© {new Date().getFullYear()}</div>
       </div>
     </footer>
-  );
-}
-
-function TelegramIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-      <path d="M21.05 2.93 2.62 10.04c-1.26.5-1.25 1.2-.23 1.52l4.73 1.48 10.94-6.9c.52-.31.99-.14.6.2l-8.86 8 .0.0-.33 4.86c.5 0 .72-.23.99-.5l2.38-2.31 4.93 3.64c.91.5 1.56.24 1.79-.84l3.24-15.28c.33-1.32-.5-1.92-1.36-1.53Z" />
-    </svg>
   );
 }
 

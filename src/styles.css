@@ -123,6 +123,32 @@
   color: transparent;
 }
 
+@utility field-input {
+  width: 100%;
+  min-height: 48px;
+  border-radius: 0.375rem;
+  border: 1px solid var(--input);
+  background: color-mix(in oklab, var(--ink) 42%, transparent);
+  padding: 0.75rem 1rem;
+  color: var(--foreground);
+  outline: none;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    background 160ms ease;
+}
+
+@utility field-input {
+  &::placeholder {
+    color: color-mix(in oklab, var(--muted-foreground) 70%, transparent);
+  }
+
+  &:focus {
+    border-color: color-mix(in oklab, var(--gold) 70%, transparent);
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--gold) 18%, transparent);
+  }
+}
+
 @utility hairline {
   height: 1px;
   background: linear-gradient(90deg, transparent, var(--gold) 50%, transparent);
