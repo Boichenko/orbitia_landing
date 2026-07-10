@@ -112,29 +112,34 @@ function Calculate() {
             Введите данные так же, как в боте: дату, время и города. Orbitia построит карту,
             подготовит расшифровку и скачает готовый PDF.
           </p>
-
-          <div className="mt-8 grid gap-3">
-            <ModeButton
-              active={isSolar}
-              icon={<CalendarDays size={18} />}
-              onClick={() => setMode("solar")}
-            >
-              Прогноз на год
-            </ModeButton>
-            <ModeButton
-              active={!isSolar}
-              icon={<Heart size={18} />}
-              onClick={() => setMode("synastry")}
-            >
-              Совместимость партнёров
-            </ModeButton>
-          </div>
         </aside>
 
         <form
           onSubmit={submitReport}
           className="rounded-lg border border-[var(--gold)]/15 bg-[var(--card)]/55 p-5 shadow-[var(--shadow-elegant)] backdrop-blur sm:p-8"
         >
+          <div className="mb-10">
+            <p className="mb-3 text-xs uppercase tracking-[0.25em] text-[var(--gold-soft)]/75">
+              Выберите тип расчёта
+            </p>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <ModeButton
+                active={isSolar}
+                icon={<CalendarDays size={18} />}
+                onClick={() => setMode("solar")}
+              >
+                Прогноз на год
+              </ModeButton>
+              <ModeButton
+                active={!isSolar}
+                icon={<Heart size={18} />}
+                onClick={() => setMode("synastry")}
+              >
+                Совместимость партнёров
+              </ModeButton>
+            </div>
+          </div>
+
           <SectionTitle eyebrow="01" title={isSolar ? "Ваши данные" : "Первый партнёр"} />
           <PersonFields value={person} onChange={setPerson} cityLabel="Город рождения" />
 
