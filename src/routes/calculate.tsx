@@ -29,6 +29,13 @@ const emptyPerson: PersonData = {
 
 const currentYear = new Date().getFullYear();
 
+function formatBirthDateInput(value: string) {
+  const digits = value.replace(/\D/g, "").slice(0, 8);
+  if (digits.length <= 2) return digits;
+  if (digits.length <= 4) return `${digits.slice(0, 2)}.${digits.slice(2)}`;
+  return `${digits.slice(0, 2)}.${digits.slice(2, 4)}.${digits.slice(4)}`;
+}
+
 function Calculate() {
   const [mode, setMode] = useState<ReportMode>("solar");
   const [person, setPerson] = useState<PersonData>(emptyPerson);
@@ -38,6 +45,7 @@ function Calculate() {
   const [userContext, setUserContext] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
+  const [reportFile, setReportFile] = useState<{ blob: Blob; filename: string } | null>(null);
 
   const isSolar = mode === "solar";
   const heading = isSolar ? "Прогноз на год" : "Совместимость партнёров";
@@ -45,6 +53,7 @@ function Calculate() {
   async function submitReport(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setStatus("loading");
+    setReportFile(null);
     setMessage("Собираю данные и формирую PDF. Это может занять пару минут.");
 
     try {
@@ -76,9 +85,9 @@ function Calculate() {
             partner_birth_place: partner.birthPlace,
           });
 
-      downloadBlob(result.blob, result.filename);
+      setReportFile(result);
       setStatus("success");
-      setMessage("Готово. PDF скачался на устройство.");
+      setMessage("PDF готов. Нажмите кнопку ниже, чтобы скачать файл.");
     } catch (error) {
       setStatus("error");
       setMessage(error instanceof Error ? error.message : "Что-то пошло не так.");
@@ -116,8 +125,20 @@ function Calculate() {
 
         <form
           onSubmit={submitReport}
-          className="rounded-lg border border-[var(--gold)]/15 bg-[var(--card)]/55 p-5 shadow-[var(--shadow-elegant)] backdrop-blur sm:p-8"
+          className="relative rounded-lg border border-[var(--gold)]/15 bg-[var(--card)]/55 p-5 shadow-[var(--shadow-elegant)] backdrop-blur sm:p-8"
         >
+          {status === "loading" ? (
+            <div className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-4 rounded-lg bg-[var(--background)]/80 px-8 text-center backdrop-blur-sm">
+              <Loader2 size={34} className="animate-spin text-[var(--gold-soft)]" />
+              <div>
+                <p className="font-display text-3xl">Готовлю PDF</p>
+                <p className="mt-2 max-w-md text-sm text-muted-foreground">
+                  Расчёт может занять пару минут. Не закрывайте страницу, файл появится здесь.
+                </p>
+              </div>
+            </div>
+          ) : null}
+
           <div className="mb-10">
             <p className="mb-3 text-xs uppercase tracking-[0.25em] text-[var(--gold-soft)]/75">
               Выберите тип расчёта
@@ -198,19 +219,44 @@ function Calculate() {
             </div>
           ) : null}
 
-          <button
-            type="submit"
-            disabled={status === "loading"}
-            className="mt-8 inline-flex w-full items-center justify-center gap-3 rounded-full px-8 py-4 text-sm font-medium uppercase tracking-[0.2em] text-[var(--ink)] shadow-[var(--shadow-glow)] transition hover:scale-[1.01] disabled:cursor-wait disabled:opacity-70"
-            style={{ background: "var(--gradient-gold)" }}
-          >
-            {status === "loading" ? (
-              <Loader2 size={18} className="animate-spin" />
-            ) : (
-              <Download size={18} />
-            )}
-            Сделать расчёт
-          </button>
+          {reportFile ? (
+            <div className="mt-8 grid gap-3 sm:grid-cols-[1fr_auto]">
+              <button
+                type="button"
+                onClick={() => downloadBlob(reportFile.blob, reportFile.filename)}
+                className="inline-flex w-full items-center justify-center gap-3 rounded-full px-8 py-4 text-sm font-medium uppercase tracking-[0.2em] text-[var(--ink)] shadow-[var(--shadow-glow)] transition hover:scale-[1.01]"
+                style={{ background: "var(--gradient-gold)" }}
+              >
+                <Download size={18} />
+                Скачать PDF
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setReportFile(null);
+                  setStatus("idle");
+                  setMessage("");
+                }}
+                className="rounded-full border border-[var(--gold)]/30 px-6 py-4 text-xs uppercase tracking-[0.2em] text-[var(--gold-soft)] transition hover:bg-[var(--gold)]/10"
+              >
+                Новый расчёт
+              </button>
+            </div>
+          ) : (
+            <button
+              type="submit"
+              disabled={status === "loading"}
+              className="mt-8 inline-flex w-full items-center justify-center gap-3 rounded-full px-8 py-4 text-sm font-medium uppercase tracking-[0.2em] text-[var(--ink)] shadow-[var(--shadow-glow)] transition hover:scale-[1.01] disabled:cursor-wait disabled:opacity-70"
+              style={{ background: "var(--gradient-gold)" }}
+            >
+              {status === "loading" ? (
+                <Loader2 size={18} className="animate-spin" />
+              ) : (
+                <Download size={18} />
+              )}
+              {status === "loading" ? "Готовлю PDF" : "Сделать расчёт"}
+            </button>
+          )}
         </form>
       </section>
     </main>
@@ -243,9 +289,11 @@ function PersonFields({
       <Field label="Дата рождения">
         <input
           value={value.birthDate}
-          onChange={(event) => patch({ birthDate: event.target.value })}
-          placeholder="25.10.1992"
+          onChange={(event) => patch({ birthDate: formatBirthDateInput(event.target.value) })}
+          inputMode="numeric"
+          placeholder="ДД.ММ.ГГГГ"
           required
+          maxLength={10}
           pattern="\d{2}\.\d{2}\.\d{4}"
           className="field-input"
         />
