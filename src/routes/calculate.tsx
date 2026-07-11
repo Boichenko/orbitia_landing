@@ -29,11 +29,52 @@ const emptyPerson: PersonData = {
 
 const currentYear = new Date().getFullYear();
 
-function formatBirthDateInput(value: string) {
-  const digits = value.replace(/\D/g, "").slice(0, 8);
-  if (digits.length <= 2) return digits;
-  if (digits.length <= 4) return `${digits.slice(0, 2)}.${digits.slice(2)}`;
-  return `${digits.slice(0, 2)}.${digits.slice(2, 4)}.${digits.slice(4)}`;
+function padDatePart(value: string) {
+  return value.length === 1 ? `0${value}` : value;
+}
+
+function formatBirthDateInput(value: string, finalize = false) {
+  const clean = value.replace(/[^\d.]/g, "").slice(0, 10);
+
+  if (clean.includes(".")) {
+    const [rawDay = "", rawMonth = "", rawYear = ""] = clean.split(".");
+    let day = rawDay.replace(/\D/g, "").slice(0, 2);
+    let month = rawMonth.replace(/\D/g, "").slice(0, 2);
+    const year = rawYear.replace(/\D/g, "").slice(0, 4);
+    const hasDayDot = clean.includes(".");
+    const hasMonthDot = clean.indexOf(".") !== clean.lastIndexOf(".");
+
+    if ((hasDayDot || finalize || Number(day) > 3) && day.length === 1) {
+      day = padDatePart(day);
+    }
+    if ((hasMonthDot || finalize || Number(month) > 1) && month.length === 1) {
+      month = padDatePart(month);
+    }
+
+    if (hasMonthDot || year) return `${day}.${month}${hasMonthDot || year ? "." : ""}${year}`;
+    if (hasDayDot || month) {
+      const shouldCloseMonth = month.length === 2 || (month.length === 1 && Number(month) > 1);
+      return `${day}.${month}${shouldCloseMonth ? "." : ""}`;
+    }
+    return day;
+  }
+
+  const digits = clean.replace(/\D/g, "").slice(0, 8);
+  if (!digits) return "";
+  if (digits.length === 1) {
+    return Number(digits) > 3 || finalize ? `${padDatePart(digits)}.` : digits;
+  }
+  if (digits.length === 2) return `${digits}.`;
+
+  const day = digits.slice(0, 2);
+  if (digits.length === 3) {
+    const monthStart = digits.slice(2);
+    return Number(monthStart) > 1 ? `${day}.0${monthStart}.` : `${day}.${monthStart}`;
+  }
+
+  const month = digits.slice(2, 4);
+  if (digits.length === 4) return `${day}.${month}.`;
+  return `${day}.${month}.${digits.slice(4)}`;
 }
 
 function Calculate() {
@@ -290,6 +331,7 @@ function PersonFields({
         <input
           value={value.birthDate}
           onChange={(event) => patch({ birthDate: formatBirthDateInput(event.target.value) })}
+          onBlur={(event) => patch({ birthDate: formatBirthDateInput(event.target.value, true) })}
           inputMode="numeric"
           placeholder="ДД.ММ.ГГГГ"
           required
