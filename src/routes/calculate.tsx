@@ -18,6 +18,7 @@ export const Route = createFileRoute("/calculate")({
 
 type ReportMode = "solar" | "synastry";
 type ReportPayload = Record<string, unknown>;
+type PaymentProvider = "yookassa" | "stripe";
 
 type PersonData = {
   name: string;
@@ -38,6 +39,8 @@ const emptyPerson: PersonData = {
 const currentYear = new Date().getFullYear();
 const SOLAR_PRICE_RUB = import.meta.env.VITE_SOLAR_PRICE_RUB || "500";
 const SYNASTRY_PRICE_RUB = import.meta.env.VITE_SYNASTRY_PRICE_RUB || "1500";
+const SOLAR_PRICE_USD = import.meta.env.VITE_SOLAR_PRICE_USD || "6";
+const SYNASTRY_PRICE_USD = import.meta.env.VITE_SYNASTRY_PRICE_USD || "17";
 
 function padDatePart(value: string) {
   return value.length === 1 ? `0${value}` : value;
@@ -190,13 +193,26 @@ function Calculate() {
   }
 
   async function confirmRubPayment() {
+    await confirmPayment("yookassa");
+  }
+
+  async function confirmUsdPayment() {
+    await confirmPayment("stripe");
+  }
+
+  async function confirmPayment(provider: PaymentProvider) {
     if (!paymentDraft) return;
     setStatus("loading");
     setMessage("Создаю платёж и перенаправляю на оплату.");
 
     try {
-      const order = await createPaymentOrder(paymentDraft.reportType, paymentDraft.payload);
-      if (!order.confirmation_url) throw new Error("ЮKassa не вернула ссылку на оплату.");
+      const order = await createPaymentOrder(
+        provider,
+        paymentDraft.reportType,
+        paymentDraft.payload,
+      );
+      if (!order.confirmation_url)
+        throw new Error("Платёжная система не вернула ссылку на оплату.");
       window.location.href = order.confirmation_url;
     } catch (error) {
       setStatus("error");
@@ -264,18 +280,30 @@ function Calculate() {
                     : "Совместимость партнёров"}
                 </h3>
                 <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-                  Сейчас откроется защищённая страница ЮKassa. После оплаты вы вернётесь на сайт,
-                  Orbitia подготовит PDF и покажет кнопку скачивания.
+                  Выберите валюту оплаты. После оплаты вы вернётесь на сайт, Orbitia подготовит PDF
+                  и покажет кнопку скачивания.
                 </p>
-                <div className="mt-6 rounded-md border border-[var(--gold)]/15 bg-[var(--ink)]/35 p-4">
-                  <div className="text-xs uppercase tracking-[0.25em] text-muted-foreground">
-                    К оплате
+                <div className="mt-6 grid gap-3 sm:grid-cols-2">
+                  <div className="rounded-md border border-[var(--gold)]/15 bg-[var(--ink)]/35 p-4">
+                    <div className="text-xs uppercase tracking-[0.25em] text-muted-foreground">
+                      Российские карты
+                    </div>
+                    <div className="mt-2 font-display text-4xl text-gold-gradient">
+                      {paymentDraft.reportType === "solar" ? SOLAR_PRICE_RUB : SYNASTRY_PRICE_RUB} ₽
+                    </div>
+                    <p className="mt-2 text-xs text-muted-foreground">Оплата через ЮKassa</p>
                   </div>
-                  <div className="mt-2 font-display text-4xl text-gold-gradient">
-                    {paymentDraft.reportType === "solar" ? SOLAR_PRICE_RUB : SYNASTRY_PRICE_RUB} ₽
+                  <div className="rounded-md border border-[var(--gold)]/15 bg-[var(--ink)]/35 p-4">
+                    <div className="text-xs uppercase tracking-[0.25em] text-muted-foreground">
+                      Международные карты
+                    </div>
+                    <div className="mt-2 font-display text-4xl text-gold-gradient">
+                      ${paymentDraft.reportType === "solar" ? SOLAR_PRICE_USD : SYNASTRY_PRICE_USD}
+                    </div>
+                    <p className="mt-2 text-xs text-muted-foreground">Оплата через Stripe</p>
                   </div>
                 </div>
-                <div className="mt-6 grid gap-3 sm:grid-cols-[1fr_auto]">
+                <div className="mt-6 grid gap-3 sm:grid-cols-2">
                   <button
                     type="button"
                     onClick={confirmRubPayment}
@@ -286,8 +314,18 @@ function Calculate() {
                   </button>
                   <button
                     type="button"
+                    onClick={confirmUsdPayment}
+                    className="inline-flex items-center justify-center gap-3 rounded-full px-7 py-4 text-sm font-medium uppercase tracking-[0.2em] text-[var(--ink)] shadow-[var(--shadow-glow)] transition hover:scale-[1.01]"
+                    style={{ background: "var(--gradient-gold)" }}
+                  >
+                    Оплатить в долларах
+                  </button>
+                </div>
+                <div className="mt-3">
+                  <button
+                    type="button"
                     onClick={() => setPaymentDraft(null)}
-                    className="rounded-full border border-[var(--gold)]/30 px-6 py-4 text-xs uppercase tracking-[0.2em] text-[var(--gold-soft)] transition hover:bg-[var(--gold)]/10"
+                    className="w-full rounded-full border border-[var(--gold)]/30 px-6 py-4 text-xs uppercase tracking-[0.2em] text-[var(--gold-soft)] transition hover:bg-[var(--gold)]/10"
                   >
                     Назад
                   </button>

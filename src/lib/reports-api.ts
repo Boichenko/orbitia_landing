@@ -8,10 +8,12 @@ export type City = {
 export type PaymentOrder = {
   order_id: string;
   payment_id?: string;
+  provider: "yookassa" | "stripe";
   report_type: "solar" | "synastry";
   status: string;
   paid: boolean;
   amount: string;
+  currency: "RUB" | "USD";
   confirmation_url?: string;
   report_ready: boolean;
   report_filename?: string;
@@ -74,13 +76,14 @@ export async function requestReportPdf(
 }
 
 export async function createPaymentOrder(
+  provider: "yookassa" | "stripe",
   reportType: "solar" | "synastry",
   payload: unknown,
 ): Promise<PaymentOrder> {
   const response = await fetch(`${API_BASE}/payments`, {
     method: "POST",
     headers: apiHeaders({ "Content-Type": "application/json" }),
-    body: JSON.stringify({ report_type: reportType, payload }),
+    body: JSON.stringify({ provider, report_type: reportType, payload }),
   });
 
   if (!response.ok) {
