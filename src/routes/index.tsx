@@ -415,6 +415,7 @@ function Footer() {
       <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-6 py-10 text-xs uppercase tracking-[0.3em] text-muted-foreground sm:flex-row">
         <div className="text-gold-gradient">ORBITIA</div>
         <div>Прогноз · Совместимость · PDF</div>
+        <div>ИНН 500130360209</div>
         <div>© {new Date().getFullYear()}</div>
       </div>
     </footer>

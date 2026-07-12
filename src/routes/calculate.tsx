@@ -454,6 +454,12 @@ function Calculate() {
           )}
         </form>
       </section>
+      <footer className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 border-t border-[var(--gold)]/15 px-0 py-8 text-xs uppercase tracking-[0.3em] text-muted-foreground sm:flex-row">
+        <div className="text-gold-gradient">ORBITIA</div>
+        <div>Прогноз · Совместимость · PDF</div>
+        <div>ИНН 500130360209</div>
+        <div>© {new Date().getFullYear()}</div>
+      </footer>
     </main>
   );
 }
