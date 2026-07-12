@@ -36,8 +36,8 @@ const emptyPerson: PersonData = {
 };
 
 const currentYear = new Date().getFullYear();
-const SOLAR_PRICE_RUB = import.meta.env.VITE_SOLAR_PRICE_RUB || "990";
-const SYNASTRY_PRICE_RUB = import.meta.env.VITE_SYNASTRY_PRICE_RUB || "1490";
+const SOLAR_PRICE_RUB = import.meta.env.VITE_SOLAR_PRICE_RUB || "500";
+const SYNASTRY_PRICE_RUB = import.meta.env.VITE_SYNASTRY_PRICE_RUB || "1500";
 
 function padDatePart(value: string) {
   return value.length === 1 ? `0${value}` : value;
