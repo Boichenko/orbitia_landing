@@ -3,13 +3,21 @@ import { CalendarDays, Download, Heart, Loader2, MapPin, Sparkles } from "lucide
 import { useEffect, useMemo, useState } from "react";
 import type { FormEvent, ReactNode } from "react";
 
-import { type City, downloadBlob, requestReportPdf, searchCities } from "@/lib/reports-api";
+import {
+  type City,
+  createPaymentOrder,
+  downloadBlob,
+  getPaymentOrder,
+  requestPaidReportPdf,
+  searchCities,
+} from "@/lib/reports-api";
 
 export const Route = createFileRoute("/calculate")({
   component: Calculate,
 });
 
 type ReportMode = "solar" | "synastry";
+type ReportPayload = Record<string, unknown>;
 
 type PersonData = {
   name: string;
@@ -28,6 +36,8 @@ const emptyPerson: PersonData = {
 };
 
 const currentYear = new Date().getFullYear();
+const SOLAR_PRICE_RUB = import.meta.env.VITE_SOLAR_PRICE_RUB || "990";
+const SYNASTRY_PRICE_RUB = import.meta.env.VITE_SYNASTRY_PRICE_RUB || "1490";
 
 function padDatePart(value: string) {
   return value.length === 1 ? `0${value}` : value;
@@ -87,15 +97,60 @@ function Calculate() {
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
   const [reportFile, setReportFile] = useState<{ blob: Blob; filename: string } | null>(null);
+  const [returnOrderId, setReturnOrderId] = useState<string | null>(null);
+  const [paymentDraft, setPaymentDraft] = useState<{
+    reportType: ReportMode;
+    payload: ReportPayload;
+  } | null>(null);
 
   const isSolar = mode === "solar";
   const heading = isSolar ? "Прогноз на год" : "Совместимость партнёров";
+  const priceRub = isSolar ? SOLAR_PRICE_RUB : SYNASTRY_PRICE_RUB;
+
+  useEffect(() => {
+    const orderId = new URLSearchParams(window.location.search).get("order_id");
+    if (!orderId) return;
+    setReturnOrderId(orderId);
+    setStatus("loading");
+    setMessage("Проверяю оплату и готовлю PDF.");
+
+    let cancelled = false;
+    async function preparePaidReport() {
+      try {
+        const order = await getPaymentOrder(orderId);
+        if (cancelled) return;
+        if (!order.paid) {
+          setStatus("error");
+          setMessage(
+            "Платёж пока не подтверждён. Если деньги списались, обновите страницу через минуту.",
+          );
+          return;
+        }
+        setMessage("Оплата прошла. Готовлю PDF, это может занять пару минут.");
+        const result = await requestPaidReportPdf(orderId);
+        if (cancelled) return;
+        setReportFile(result);
+        setStatus("success");
+        setMessage("PDF готов. Нажмите кнопку ниже, чтобы скачать файл.");
+        window.history.replaceState({}, "", window.location.pathname);
+      } catch (error) {
+        if (cancelled) return;
+        setStatus("error");
+        setMessage(
+          error instanceof Error ? error.message : "Не удалось получить оплаченный расчёт.",
+        );
+      }
+    }
+    void preparePaidReport();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   async function submitReport(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setStatus("loading");
     setReportFile(null);
-    setMessage("Собираю данные и формирую PDF. Это может занять пару минут.");
+    setMessage("");
 
     try {
       if (!person.birthPlace) throw new Error("Выберите город рождения из списка.");
@@ -109,29 +164,44 @@ function Calculate() {
         birth_place: person.birthPlace,
       };
 
-      const result = isSolar
-        ? await requestReportPdf("/reports/solar", {
+      const reportType = isSolar ? "solar" : "synastry";
+      const reportPayload = isSolar
+        ? {
             report_type: "solar",
             ...basePerson,
             solar_place: solarPlace,
             solar_cycle_year: Number(solarCycleYear),
             user_context: userContext.trim() || null,
-          })
-        : await requestReportPdf("/reports/synastry", {
+          }
+        : {
             report_type: "synastry",
             ...basePerson,
             partner_name: partner.name.trim(),
             partner_birth_date: partner.birthDate.trim(),
             partner_birth_time: partner.timeUnknown ? null : partner.birthTime || null,
             partner_birth_place: partner.birthPlace,
-          });
+          };
 
-      setReportFile(result);
-      setStatus("success");
-      setMessage("PDF готов. Нажмите кнопку ниже, чтобы скачать файл.");
+      setPaymentDraft({ reportType, payload: reportPayload });
     } catch (error) {
       setStatus("error");
       setMessage(error instanceof Error ? error.message : "Что-то пошло не так.");
+    }
+  }
+
+  async function confirmRubPayment() {
+    if (!paymentDraft) return;
+    setStatus("loading");
+    setMessage("Создаю платёж и перенаправляю на оплату.");
+
+    try {
+      const order = await createPaymentOrder(paymentDraft.reportType, paymentDraft.payload);
+      if (!order.confirmation_url) throw new Error("ЮKassa не вернула ссылку на оплату.");
+      window.location.href = order.confirmation_url;
+    } catch (error) {
+      setStatus("error");
+      setPaymentDraft(null);
+      setMessage(error instanceof Error ? error.message : "Не удалось создать платёж.");
     }
   }
 
@@ -174,8 +244,54 @@ function Calculate() {
               <div>
                 <p className="font-display text-3xl">Готовлю PDF</p>
                 <p className="mt-2 max-w-md text-sm text-muted-foreground">
-                  Расчёт может занять пару минут. Не закрывайте страницу, файл появится здесь.
+                  {returnOrderId
+                    ? "Оплата прошла, расчёт может занять пару минут. Не закрывайте страницу."
+                    : "Сейчас откроется страница оплаты ЮKassa."}
                 </p>
+              </div>
+            </div>
+          ) : null}
+
+          {paymentDraft ? (
+            <div className="absolute inset-0 z-40 flex items-center justify-center rounded-lg bg-[var(--background)]/80 p-5 backdrop-blur-sm">
+              <div className="w-full max-w-lg rounded-lg border border-[var(--gold)]/20 bg-[var(--card)] p-6 shadow-[var(--shadow-elegant)]">
+                <p className="text-xs uppercase tracking-[0.25em] text-[var(--gold-soft)]/75">
+                  Оплата расчёта
+                </p>
+                <h3 className="mt-3 font-display text-3xl">
+                  {paymentDraft.reportType === "solar"
+                    ? "Прогноз на год"
+                    : "Совместимость партнёров"}
+                </h3>
+                <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
+                  Сейчас откроется защищённая страница ЮKassa. После оплаты вы вернётесь на сайт,
+                  Orbitia подготовит PDF и покажет кнопку скачивания.
+                </p>
+                <div className="mt-6 rounded-md border border-[var(--gold)]/15 bg-[var(--ink)]/35 p-4">
+                  <div className="text-xs uppercase tracking-[0.25em] text-muted-foreground">
+                    К оплате
+                  </div>
+                  <div className="mt-2 font-display text-4xl text-gold-gradient">
+                    {paymentDraft.reportType === "solar" ? SOLAR_PRICE_RUB : SYNASTRY_PRICE_RUB} ₽
+                  </div>
+                </div>
+                <div className="mt-6 grid gap-3 sm:grid-cols-[1fr_auto]">
+                  <button
+                    type="button"
+                    onClick={confirmRubPayment}
+                    className="inline-flex items-center justify-center gap-3 rounded-full px-7 py-4 text-sm font-medium uppercase tracking-[0.2em] text-[var(--ink)] shadow-[var(--shadow-glow)] transition hover:scale-[1.01]"
+                    style={{ background: "var(--gradient-gold)" }}
+                  >
+                    Оплатить в рублях
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPaymentDraft(null)}
+                    className="rounded-full border border-[var(--gold)]/30 px-6 py-4 text-xs uppercase tracking-[0.2em] text-[var(--gold-soft)] transition hover:bg-[var(--gold)]/10"
+                  >
+                    Назад
+                  </button>
+                </div>
               </div>
             </div>
           ) : null}
@@ -244,8 +360,8 @@ function Calculate() {
 
           <div className="mt-10 rounded-md border border-[var(--gold)]/15 bg-[var(--ink)]/35 p-4 text-sm text-muted-foreground">
             {isSolar
-              ? "Нужны имя, дата, время и место рождения, город дня рождения и год периода."
-              : "Нужны данные обоих партнёров. Если точное время неизвестно, отметьте это в форме."}
+              ? `Нужны имя, дата, время и место рождения, город дня рождения и год периода. Стоимость: ${priceRub} ₽.`
+              : `Нужны данные обоих партнёров. Если точное время неизвестно, отметьте это в форме. Стоимость: ${priceRub} ₽.`}
           </div>
 
           {message ? (
@@ -295,7 +411,7 @@ function Calculate() {
               ) : (
                 <Download size={18} />
               )}
-              {status === "loading" ? "Готовлю PDF" : "Сделать расчёт"}
+              {status === "loading" ? "Подготавливаю" : "Сделать расчёт"}
             </button>
           )}
         </form>

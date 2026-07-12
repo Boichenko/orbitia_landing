@@ -5,6 +5,18 @@ export type City = {
   lon: number;
 };
 
+export type PaymentOrder = {
+  order_id: string;
+  payment_id?: string;
+  report_type: "solar" | "synastry";
+  status: string;
+  paid: boolean;
+  amount: string;
+  confirmation_url?: string;
+  report_ready: boolean;
+  report_filename?: string;
+};
+
 const API_BASE =
   (import.meta.env.VITE_ORBITIA_API_URL as string | undefined)?.replace(/\/$/, "") ||
   "/api/orbitia";
@@ -57,6 +69,54 @@ export async function requestReportPdf(
   const filename = filenameFromDisposition(
     response.headers.get("content-disposition"),
     path.includes("synastry") ? "orbitia-synastry.pdf" : "orbitia-solar.pdf",
+  );
+  return { blob, filename };
+}
+
+export async function createPaymentOrder(
+  reportType: "solar" | "synastry",
+  payload: unknown,
+): Promise<PaymentOrder> {
+  const response = await fetch(`${API_BASE}/payments`, {
+    method: "POST",
+    headers: apiHeaders({ "Content-Type": "application/json" }),
+    body: JSON.stringify({ report_type: reportType, payload }),
+  });
+
+  if (!response.ok) {
+    const detail = await response.text().catch(() => "");
+    throw new Error(detail || "Не удалось создать платёж");
+  }
+  return response.json();
+}
+
+export async function getPaymentOrder(orderId: string): Promise<PaymentOrder> {
+  const response = await fetch(`${API_BASE}/payments/orders/${orderId}`, {
+    headers: apiHeaders(),
+  });
+
+  if (!response.ok) {
+    const detail = await response.text().catch(() => "");
+    throw new Error(detail || "Не удалось проверить платёж");
+  }
+  return response.json();
+}
+
+export async function requestPaidReportPdf(orderId: string) {
+  const response = await fetch(`${API_BASE}/payments/orders/${orderId}/report`, {
+    method: "POST",
+    headers: apiHeaders(),
+  });
+
+  if (!response.ok) {
+    const detail = await response.text().catch(() => "");
+    throw new Error(detail || "Не удалось сформировать PDF");
+  }
+
+  const blob = await response.blob();
+  const filename = filenameFromDisposition(
+    response.headers.get("content-disposition"),
+    "orbitia-report.pdf",
   );
   return { blob, filename };
 }
