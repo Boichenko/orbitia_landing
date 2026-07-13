@@ -164,22 +164,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     scripts: [
       {
         tag: "script",
-        attrs: {
-          async: true,
-          src: `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`,
-        },
-      },
-      {
-        tag: "script",
-        children: `
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', '${GA_MEASUREMENT_ID}');
-        `,
-      },
-      {
-        tag: "script",
         attrs: { type: "application/ld+json" },
         children: JSON.stringify(structuredData),
       },
@@ -196,6 +180,18 @@ function RootShell({ children }: { children: ReactNode }) {
   return (
     <html lang="ru">
       <head>
+        <script async src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`} />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', '${GA_MEASUREMENT_ID}');
+`,
+          }}
+        />
         <HeadContent />
       </head>
       <body>
