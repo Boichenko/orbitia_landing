@@ -249,20 +249,33 @@
 
 .hero-orbit {
   border: 0;
-  opacity: 0.72;
-  filter: blur(2px);
+  opacity: 0.82;
+}
+
+.hero-orbit::before {
+  position: absolute;
+  inset: 0;
+  border: 2px solid color-mix(in oklab, var(--gold) 42%, transparent);
+  border-radius: inherit;
+  content: "";
+  filter: blur(5px);
 }
 
 .hero-orbit-outer {
   box-shadow:
-    inset 0 0 12px color-mix(in oklab, var(--gold) 30%, transparent),
-    0 0 14px color-mix(in oklab, var(--gold) 22%, transparent);
+    inset 0 0 18px color-mix(in oklab, var(--gold) 28%, transparent),
+    0 0 20px color-mix(in oklab, var(--gold) 25%, transparent);
 }
 
 .hero-orbit-inner {
   box-shadow:
-    inset 0 0 9px color-mix(in oklab, var(--gold) 24%, transparent),
-    0 0 12px color-mix(in oklab, var(--gold) 18%, transparent);
+    inset 0 0 14px color-mix(in oklab, var(--gold) 25%, transparent),
+    0 0 17px color-mix(in oklab, var(--gold) 22%, transparent);
+}
+
+.hero-orbit-inner::before {
+  border-width: 1.5px;
+  filter: blur(4px);
 }
 
 @media (prefers-reduced-motion: reduce) {

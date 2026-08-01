@@ -436,7 +436,7 @@ function Stars() {
     return () => document.removeEventListener("visibilitychange", syncVisibility);
   }, []);
 
-  const dots = Array.from({ length: 40 });
+  const dots = Array.from({ length: 80 });
   return (
     <div
       aria-hidden
