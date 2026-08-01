@@ -140,7 +140,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         property: "og:description",
         content: SITE_DESCRIPTION,
       },
-      { property: "og:url", content: SITE_URL },
       { property: "og:type", content: "website" },
       { property: "og:image", content: SITE_IMAGE },
       { property: "og:image:alt", content: "Orbitia — соляр на год и совместимость в PDF" },
@@ -151,7 +150,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     ],
     links: [
       { rel: "stylesheet", href: appCss },
-      { rel: "canonical", href: SITE_URL },
       { rel: "icon", href: "/assets/orbitia-logo.jpeg", type: "image/jpeg" },
       { rel: "apple-touch-icon", href: "/assets/orbitia-logo.jpeg" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },

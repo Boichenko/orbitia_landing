@@ -1,8 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useState, type CSSProperties } from "react";
 import orbitiaLogo from "@/assets/orbitia-logo.asset.json";
 import { trackReportIntent } from "@/lib/analytics";
 
 export const Route = createFileRoute("/")({
+  head: () => ({
+    meta: [{ property: "og:url", content: "https://orbitia.info/" }],
+    links: [{ rel: "canonical", href: "https://orbitia.info/" }],
+  }),
   component: Index,
 });
 
@@ -50,8 +55,8 @@ function Hero() {
     <section className="relative z-10 mx-auto flex max-w-6xl flex-col items-center px-6 pt-12 pb-24 text-center">
       <div className="relative mb-10 flex h-64 w-64 items-center justify-center sm:h-80 sm:w-80">
         <div className="absolute inset-0 rounded-full bg-[var(--gold)]/8 blur-3xl" />
-        <div className="absolute inset-4 rounded-full border border-[var(--gold)]/20 animate-spin-slow" />
-        <div className="absolute inset-12 rounded-full border border-dashed border-[var(--gold)]/15 animate-spin-reverse" />
+        <div className="hero-orbit hero-orbit-outer absolute inset-4 rounded-full animate-spin-slow" />
+        <div className="hero-orbit hero-orbit-inner absolute inset-12 rounded-full animate-spin-reverse" />
         <div className="relative z-10 h-full w-full overflow-hidden rounded-[2rem] border border-[var(--gold)]/20 bg-[oklch(0.09_0.02_265)]/80 shadow-[var(--shadow-glow)] backdrop-blur-sm">
           <img
             src={orbitiaLogo.url}
@@ -415,7 +420,6 @@ function Footer() {
       <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-6 py-10 text-xs uppercase tracking-[0.3em] text-muted-foreground sm:flex-row">
         <div className="text-gold-gradient">ORBITIA</div>
         <div>Прогноз · Совместимость · PDF</div>
-        <div>ИНН 500130360209</div>
         <div>© {new Date().getFullYear()}</div>
       </div>
     </footer>
@@ -423,25 +427,46 @@ function Footer() {
 }
 
 function Stars() {
+  const [isPageVisible, setIsPageVisible] = useState(true);
+
+  useEffect(() => {
+    const syncVisibility = () => setIsPageVisible(!document.hidden);
+    syncVisibility();
+    document.addEventListener("visibilitychange", syncVisibility);
+    return () => document.removeEventListener("visibilitychange", syncVisibility);
+  }, []);
+
   const dots = Array.from({ length: 40 });
   return (
-    <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
+    <div
+      aria-hidden
+      className="stars-field pointer-events-none absolute inset-0 -z-10 overflow-hidden"
+      data-paused={!isPageVisible}
+    >
       {dots.map((_, i) => {
         const top = (i * 37) % 100;
         const left = (i * 53) % 100;
         const size = ((i % 3) + 1) * 1.2;
         const delay = (i % 7) * 0.4;
+        const motion = {
+          "--star-x-1": `${((i * 29) % 31) - 15}vw`,
+          "--star-y-1": `${((i * 43) % 35) - 17}vh`,
+          "--star-x-2": `${((i * 61) % 41) - 20}vw`,
+          "--star-y-2": `${((i * 17) % 39) - 19}vh`,
+          "--star-x-3": `${((i * 47) % 37) - 18}vw`,
+          "--star-y-3": `${((i * 71) % 33) - 16}vh`,
+        } as CSSProperties;
         return (
           <span
             key={i}
-            className="absolute rounded-full bg-[var(--gold-soft)] animate-twinkle"
+            className="dynamic-star absolute rounded-full bg-[var(--gold-soft)]"
             style={{
               top: `${top}%`,
               left: `${left}%`,
               width: size,
               height: size,
-              opacity: 0.4,
               animationDelay: `${delay}s`,
+              ...motion,
             }}
           />
         );

@@ -40,6 +40,26 @@ async function normalizeCatastrophicSsrResponse(response: Response): Promise<Res
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
+      const url = new URL(request.url);
+      const forwardedHost = request.headers.get("x-forwarded-host")?.split(",")[0]?.trim();
+      const requestHost = (forwardedHost || request.headers.get("host") || url.host)
+        .toLowerCase()
+        .split(":")[0];
+
+      // Keep one permanent, crawlable URL for every page. The reverse proxy already
+      // upgrades HTTP to HTTPS; these redirects cover the duplicate www host and
+      // TanStack Router's otherwise temporary trailing-slash redirect.
+      if (
+        requestHost === "www.orbitia.info" ||
+        (url.pathname !== "/" && url.pathname.endsWith("/"))
+      ) {
+        url.protocol = "https:";
+        url.hostname = "orbitia.info";
+        url.port = "";
+        if (url.pathname !== "/") url.pathname = url.pathname.replace(/\/+$/, "");
+        return Response.redirect(url, 308);
+      }
+
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
       return await normalizeCatastrophicSsrResponse(response);

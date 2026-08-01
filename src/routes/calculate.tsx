@@ -13,6 +13,18 @@ import {
 } from "@/lib/reports-api";
 
 export const Route = createFileRoute("/calculate")({
+  head: () => ({
+    meta: [
+      { title: "Рассчитать прогноз на год или совместимость — Orbitia" },
+      {
+        name: "description",
+        content:
+          "Введите данные рождения и получите персональный прогноз на год или разбор совместимости партнёров в PDF.",
+      },
+      { property: "og:url", content: "https://orbitia.info/calculate" },
+    ],
+    links: [{ rel: "canonical", href: "https://orbitia.info/calculate" }],
+  }),
   component: Calculate,
 });
 
@@ -108,7 +120,6 @@ function Calculate() {
 
   const isSolar = mode === "solar";
   const heading = isSolar ? "Прогноз на год" : "Совместимость партнёров";
-  const priceRub = isSolar ? SOLAR_PRICE_RUB : SYNASTRY_PRICE_RUB;
 
   useEffect(() => {
     const orderId = new URLSearchParams(window.location.search).get("order_id");
@@ -398,8 +409,8 @@ function Calculate() {
 
           <div className="mt-10 rounded-md border border-[var(--gold)]/15 bg-[var(--ink)]/35 p-4 text-sm text-muted-foreground">
             {isSolar
-              ? `Нужны имя, дата, время и место рождения, город дня рождения и год периода. Стоимость: ${priceRub} ₽.`
-              : `Нужны данные обоих партнёров. Если точное время неизвестно, отметьте это в форме. Стоимость: ${priceRub} ₽.`}
+              ? "Нужны имя, дата, время и место рождения, город дня рождения и год периода."
+              : "Нужны данные обоих партнёров. Если точное время неизвестно, отметьте это в форме."}
           </div>
 
           {message ? (
@@ -457,7 +468,6 @@ function Calculate() {
       <footer className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 border-t border-[var(--gold)]/15 px-0 py-8 text-xs uppercase tracking-[0.3em] text-muted-foreground sm:flex-row">
         <div className="text-gold-gradient">ORBITIA</div>
         <div>Прогноз · Совместимость · PDF</div>
-        <div>ИНН 500130360209</div>
         <div>© {new Date().getFullYear()}</div>
       </footer>
     </main>
