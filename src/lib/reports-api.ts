@@ -17,6 +17,8 @@ export type PaymentOrder = {
   confirmation_url?: string;
   report_ready: boolean;
   report_filename?: string;
+  report_url?: string;
+  pdf_url?: string;
 };
 
 const API_BASE =
@@ -122,6 +124,19 @@ export async function requestPaidReportPdf(orderId: string) {
     "orbitia-report.pdf",
   );
   return { blob, filename };
+}
+
+export async function requestPaidReportAccess(orderId: string): Promise<PaymentOrder> {
+  const response = await fetch(`${API_BASE}/payments/orders/${orderId}/report/access`, {
+    method: "POST",
+    headers: apiHeaders(),
+  });
+
+  if (!response.ok) {
+    const detail = await response.text().catch(() => "");
+    throw new Error(detail || "Не удалось сформировать отчёт");
+  }
+  return response.json();
 }
 
 export function downloadBlob(blob: Blob, filename: string) {

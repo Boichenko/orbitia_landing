@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { CalendarDays, Download, Heart, Loader2, MapPin, Sparkles } from "lucide-react";
+import { CalendarDays, Download, ExternalLink, Heart, Loader2, MapPin, Sparkles } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import type { FormEvent, ReactNode } from "react";
 
@@ -8,7 +8,7 @@ import {
   createPaymentOrder,
   downloadBlob,
   getPaymentOrder,
-  requestPaidReportPdf,
+  requestPaidReportAccess,
   searchCities,
 } from "@/lib/reports-api";
 
@@ -112,6 +112,7 @@ function Calculate() {
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
   const [reportFile, setReportFile] = useState<{ blob: Blob; filename: string } | null>(null);
+  const [reportLinks, setReportLinks] = useState<{ reportUrl?: string; pdfUrl: string } | null>(null);
   const [returnOrderId, setReturnOrderId] = useState<string | null>(null);
   const [paymentDraft, setPaymentDraft] = useState<{
     reportType: ReportMode;
@@ -141,11 +142,16 @@ function Calculate() {
           return;
         }
         setMessage("Оплата прошла. Готовлю PDF, это может занять пару минут.");
-        const result = await requestPaidReportPdf(orderId);
+        const result = await requestPaidReportAccess(orderId);
         if (cancelled) return;
-        setReportFile(result);
+        if (!result.pdf_url) throw new Error("Ссылка на PDF не была создана.");
+        setReportLinks({ reportUrl: result.report_url, pdfUrl: result.pdf_url });
         setStatus("success");
-        setMessage("PDF готов. Нажмите кнопку ниже, чтобы скачать файл.");
+        setMessage(
+          result.report_url
+            ? "Отчёт готов. Откройте адаптивную версию или скачайте PDF."
+            : "PDF готов. Нажмите кнопку ниже, чтобы скачать файл.",
+        );
         window.history.replaceState({}, "", window.location.pathname);
       } catch (error) {
         if (cancelled) return;
@@ -164,6 +170,7 @@ function Calculate() {
   async function submitReport(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setReportFile(null);
+    setReportLinks(null);
     setMessage("");
 
     try {
@@ -425,21 +432,39 @@ function Calculate() {
             </div>
           ) : null}
 
-          {reportFile ? (
-            <div className="mt-8 grid gap-3 sm:grid-cols-[1fr_auto]">
-              <button
-                type="button"
-                onClick={() => downloadBlob(reportFile.blob, reportFile.filename)}
+          {reportLinks || reportFile ? (
+            <div className="mt-8 grid gap-3 sm:grid-cols-2">
+              {reportLinks?.reportUrl ? (
+                <a
+                  href={reportLinks.reportUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex w-full items-center justify-center gap-3 rounded-full px-8 py-4 text-sm font-medium uppercase tracking-[0.2em] text-[var(--ink)] shadow-[var(--shadow-glow)] transition hover:scale-[1.01]"
+                  style={{ background: "var(--gradient-gold)" }}
+                >
+                  <ExternalLink size={18} />
+                  Открыть отчёт
+                </a>
+              ) : null}
+              <a
+                href={reportLinks?.pdfUrl}
+                download
+                onClick={(event) => {
+                  if (reportLinks) return;
+                  event.preventDefault();
+                  if (reportFile) downloadBlob(reportFile.blob, reportFile.filename);
+                }}
                 className="inline-flex w-full items-center justify-center gap-3 rounded-full px-8 py-4 text-sm font-medium uppercase tracking-[0.2em] text-[var(--ink)] shadow-[var(--shadow-glow)] transition hover:scale-[1.01]"
                 style={{ background: "var(--gradient-gold)" }}
               >
                 <Download size={18} />
                 Скачать PDF
-              </button>
+              </a>
               <button
                 type="button"
                 onClick={() => {
                   setReportFile(null);
+                  setReportLinks(null);
                   setStatus("idle");
                   setMessage("");
                 }}
