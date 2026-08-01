@@ -491,7 +491,7 @@ function PersonFields({
         <input
           value={value.name}
           onChange={(event) => patch({ name: event.target.value })}
-          placeholder="Анна"
+          placeholder="Анастасия"
           required
           maxLength={50}
           className="field-input"
@@ -601,7 +601,7 @@ function CityField({
             setQuery(event.target.value);
             onChange(null);
           }}
-          placeholder="Минск, Беларусь"
+          placeholder="Алматы, Казахстан"
           required
           className="field-input pl-11"
         />
